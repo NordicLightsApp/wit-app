@@ -5,6 +5,8 @@ import {
   Pressable,
   StyleSheet,
   Text,
+  Appearance,
+  useColorScheme,
   View,
 } from "react-native";
 
@@ -21,6 +23,34 @@ export const AngleData = () => {
   const [valueY, setValueY] = useState(0);
   const [valueZ, setValueZ] = useState(0);
   const [searching, setSearching] = useState(false);
+  var colors = {
+  	"background": "#FFF",
+  	"foreground": "#000",
+  	"primary": "#FF8200",
+  	"gray": "#D9D9D6",
+  	"secondary": "#32C8BE",
+  	"complementary": "#A9D52D"
+  };
+
+  const changeTheme = (preferences) => {
+  console.log(preferences.colorScheme);
+  console.log(typeof(preferences.colorScheme));
+  	switch (preferences.colorScheme) {
+  		case 'dark':
+  			colors.background = "#000";
+  			colors.foreground = "#FFF";
+  		break;
+  		case 'light':
+  		default:
+  			colors.background = "#FFF";
+  			colors.foreground = "#000";
+  		break;
+  	}
+  };
+    //switch between light and dark mode
+  Appearance.addChangeListener(changeTheme);
+
+	changeTheme({"colorScheme": Appearance.getColorScheme()});
 
   useEffect(() => {
     const timeInterval = setInterval(() => {
@@ -90,38 +120,39 @@ export const AngleData = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text>Click to start discovering devices</Text>
+    <View style={[styles.container,{backgroundColor: colors.background}]}>
+      <Text style={{color: colors.foreground}}>Click to start discovering devices</Text>
       <Button
+      	color={colors.primary}
         disabled={deviceName !== "" || searching}
         title="Start search"
         onPress={startSearch}
       />
-      {searching && <Text>Searching...</Text>}
-      <Text>{deviceName}</Text>
-      <Text>Angle X: {angleX}</Text>
-      <Text>Angle Y: {angleY}</Text>
-      <Text>Angle Z: {angleZ}</Text>
-      <Text style={styles.angleText}>Zeroed X: {zeroedX} </Text>
-      <Text style={styles.angleText}>Zeroed Y: {zeroedY} </Text>
-      <Text style={styles.angleText}>Zeroed Z: {zeroedZ} </Text>
+      {searching && <Text style={{color: colors.foreground}}>Searching...</Text>}
+      <Text style={{color: colors.foreground}}>{deviceName}</Text>
+      <Text style={{color: colors.foreground}}>Angle X: {angleX}</Text>
+      <Text style={{color: colors.foreground}}>Angle Y: {angleY}</Text>
+      <Text style={{color: colors.foreground}}>Angle Z: {angleZ}</Text>
+      <Text style={[styles.angleText,{color: colors.foreground}]}>Zeroed X: {zeroedX} </Text>
+      <Text style={[styles.angleText,{color: colors.foreground}]}>Zeroed Y: {zeroedY} </Text>
+      <Text style={[styles.angleText,{color: colors.foreground}]}>Zeroed Z: {zeroedZ} </Text>
       <Pressable
         style={{
-          backgroundColor: "lightblue",
-          padding: 5,
+          backgroundColor: colors.primary,
+          padding: 12,
+          borderRadius: 50,
         }}
         onPress={zeroAngles}
       >
         <Text>Zero angles</Text>
       </Pressable>
     </View>
-  );
+  )
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
     gap: 10,
