@@ -9,6 +9,7 @@ import {
   useColorScheme,
   View,
 } from "react-native";
+import {AngleView} from "./angleView";
 
 export const AngleData = () => {
   const { BluetoothModule } = NativeModules;
@@ -23,18 +24,18 @@ export const AngleData = () => {
   const [valueY, setValueY] = useState(0);
   const [valueZ, setValueZ] = useState(0);
   const [searching, setSearching] = useState(false);
-  var colors = {
+  const [colors, setColors] = useState({
   	"background": "#FFF",
   	"foreground": "#000",
   	"primary": "#FF8200",
-  	"gray": "#D9D9D6",
+  	"grey": "#D9D9D6",
   	"secondary": "#32C8BE",
   	"complementary": "#A9D52D"
-  };
+  });
 
   const changeTheme = (preferences) => {
-  console.log(preferences.colorScheme);
-  console.log(typeof(preferences.colorScheme));
+  /*console.log(preferences.colorScheme);
+  console.log(typeof(preferences.colorScheme));*/
   	switch (preferences.colorScheme) {
   		case 'dark':
   			colors.background = "#000";
@@ -120,7 +121,8 @@ export const AngleData = () => {
   };
 
   return (
-    <View style={[styles.container,{backgroundColor: colors.background}]}>
+    <View renderToHardwareTextureAndroid={true} style={[styles.container,{backgroundColor: colors.background}]}>
+    	<AngleView x={zeroedZ} y={zeroedX} background={colors.grey} indicator={colors.primary}/>
       <Text style={{color: colors.foreground}}>Click to start discovering devices</Text>
       <Button
       	color={colors.primary}
