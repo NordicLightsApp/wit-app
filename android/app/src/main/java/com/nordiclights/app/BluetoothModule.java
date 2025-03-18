@@ -1,4 +1,4 @@
-package com.jasminfranti.witapi;
+package com.nordiclights.app;
 
 import android.util.Log;
 import android.widget.Button;
@@ -32,7 +32,7 @@ public class BluetoothModule extends ReactContextBaseJavaModule implements IBlue
     private String deviceName = "";
     private String angleX = "";
     private String angleY = "";
-    private String angleZ = ""; 
+    private String angleZ = "";
     private String errorMessage = "default";
 
     public BluetoothModule(ReactApplicationContext reactContext) {
@@ -102,7 +102,7 @@ public class BluetoothModule extends ReactContextBaseJavaModule implements IBlue
     public void startDiscovery() {
         // Get the current Activity from ReactApplicationContext
         Activity currentActivity = getCurrentActivity();
-    
+
         // Check if currentActivity is not null
         if (currentActivity != null) {
             WitBluetoothManager.initInstance(currentActivity);
