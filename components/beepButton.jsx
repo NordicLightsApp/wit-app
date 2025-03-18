@@ -1,60 +1,52 @@
 import { useState, useEffect } from "react"
 import { Text, Button, View, Vibration } from "react-native"
-import {useAudioPlayer, AudioPlayer, createAudioPlayer} from "expo-audio"
+import {useAudioPlayer} from "expo-audio"
+const keyboardPath = "./BeepKeyboardEMajor/"
 const beepSources = [
-    require("./BeepKeyboardEMajor/beepMiddleE.wav"),
-    require("./BeepKeyboardEMajor/beepHighA.wav")]
+    require(keyboardPath+"beepMiddleE.wav"),
+    
+    require(keyboardPath+"beepLowE.wav"),
+    require(keyboardPath+"beepLowFs.wav"),
+    require(keyboardPath+"beepLowGs.wav"),
+    require(keyboardPath+"beepLowA.wav"),
+    require(keyboardPath+"beepLowB.wav"),
+    require(keyboardPath+"beepLowCs.wav"),
+    require(keyboardPath+"beepLowDs.wav"),
+
+    require(keyboardPath+"beepHighFs.wav"),
+    require(keyboardPath+"beepHighGs.wav"),
+    require(keyboardPath+"beepHighA.wav"),
+    require(keyboardPath+"beepHighB.wav"),
+    require(keyboardPath+"beepHighCs.wav"),
+    require(keyboardPath+"beepHighDs.wav"),
+    require(keyboardPath+"beepHighE.wav"),
+]
 
 export const BeepButtonComponent = () => {
     const [calibrating, SetCalibrating] = useState(false)
     const [calibrationStartedOnce, SetCalibrationStartedOnce] = useState(false)
-
     const [text, SetText] = useState("Start angle setup")
-    const [targetAngle, SetTargetAngle] = useState(45)
-
-    const beepCurrentPlayer1 = useAudioPlayer(beepSources[1])
-    const beepCurrentPlayer2 = createAudioPlayer(beepSources[1])
-    const beepTargetPlayer1 = useAudioPlayer(beepSources[0])
-    const beepTargetPlayer2 = createAudioPlayer(beepSources[0])
-    const [soundPlayerSwitched, SetSoundPlayerSwitched] = useState(false)
-
-    
     useEffect(()=>{
         if(!calibrationStartedOnce) return;
-        var soundInterval
+        var currentAngleSoundInterval
+        var targetAngleSoundInterval;
         if (calibrating){
-            soundInterval = setInterval(playCurrentBeep, 1100)
+            console.log("deedee")
+            
+            currentAngleSoundInterval = setInterval(()=>{}, 1000)
+            //setTimeout(() => {targetAngleSoundInterval = setInterval(playTargetBeep), 1000}, 200)
         } else{
-            clearInterval(soundInterval)
-        }
-        return () => {
-            clearInterval(soundInterval)
+            console.log("megadoodoo")
+            
         }
     },[calibrating])
-
-    function setCurrentNote(noteNum){
-        beepCurrentPlayer.replace(beepSources[noteNum])
-    }
-    const audioRestart = (player) => {
-        player.pause()
-        player.seekTo(0)
-        player.play()
-    }
-
     function playCurrentBeep(){
-        console.log("current")
-        const player = soundPlayerSwitched ? beepCurrentPlayer2 : beepCurrentPlayer1
-        audioRestart(player)
-        Vibration.vibrate(80)
-        setTimeout(playTargetBeep, 120)
+        const beepPlayer = useAudioPlayer(beepSources[1])
+        beepPlayer.play()
     }
-    
     function playTargetBeep(){
-        console.log("target")
-        const player = soundPlayerSwitched ? beepTargetPlayer2 : beepTargetPlayer1
-        audioRestart(player)
-        SetSoundPlayerSwitched(!soundPlayerSwitched)
-        Vibration.vibrate(80)
+        const beepPlayer = useAudioPlayer(beepSources[0])
+        beepPlayer.play()
     }
     const handleClick = () => {
         SetText((calibrating ? "Start" : "Stop") + " angle setup")
@@ -63,7 +55,6 @@ export const BeepButtonComponent = () => {
         Vibration.vibrate([0, 100, 100, 100, 100, 100]);
     }
     return <View>
-        <Text>Target angle: {targetAngle} </Text>
         <Button onPress = {handleClick} title = {text} />
     </View>
 }

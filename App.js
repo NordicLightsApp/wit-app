@@ -1,12 +1,12 @@
 import { StyleSheet } from "react-native";
 import { AngleData } from "./components/angles";
 import { BeepButtonComponent } from "./components/beepButton";
+import { AngleDataAndCalibration } from "./components/angleDataAndCalibration";
 
 export default function App() {
   return (
     <>
-      <AngleData />
-      <BeepButtonComponent />
+      <AngleDataAndCalibration/>
     </>
   );
 }
