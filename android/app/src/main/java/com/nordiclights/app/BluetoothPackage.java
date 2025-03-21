@@ -1,4 +1,4 @@
-package com.jasminfranti.witapi;
+package com.nordiclights.app;
 
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.ReactApplicationContext;

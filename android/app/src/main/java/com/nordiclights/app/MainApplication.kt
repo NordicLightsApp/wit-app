@@ -1,4 +1,4 @@
-package com.jasminfranti.witapi
+package com.nordiclights.app
 
 import android.app.Application
 import android.content.res.Configuration
