@@ -8,10 +8,11 @@ import {
   View,
   Vibration
 } from "react-native";
-import {useAudioPlayer, PLAYBACK_STATUS_UPDATE, AudioStatus} from "expo-audio"
+import {useAudioPlayer, createAudioPlayer} from "expo-audio"
 const keyboardPath = "./BeepKeyboardEMajor/"
-const middleBeepSource = require(keyboardPath+"beepMiddleE.wav");
 const beepSources = [
+    require(keyboardPath+"beepMiddleE.wav"),
+    
     require(keyboardPath+"beepLowE.wav"),
     require(keyboardPath+"beepLowFs.wav"),
     require(keyboardPath+"beepLowGs.wav"),
@@ -28,8 +29,7 @@ const beepSources = [
     require(keyboardPath+"beepHighDs.wav"),
     require(keyboardPath+"beepHighE.wav"),
 ]
-let pendingNoteIndex = 0
-let playingNoteIndex = 0
+let currentNoteIndex = 1
 let soundPlayerSwitched = false
 let noteTestZ = 0
 
@@ -123,11 +123,9 @@ export const AngleDataAndCalibration = () => {
     }
   };
 
-
   //
-  // --------------- ANGLE CALIBRATION --------------------
+  //ANGLE CALIBRATION
   //
-
 
   const [calibrating, SetCalibrating] = useState(false)
   const [calibrationStartedOnce, SetCalibrationStartedOnce] = useState(false)
@@ -135,29 +133,32 @@ export const AngleDataAndCalibration = () => {
   const [calibrationButtonTitle, SetText] = useState("Start angle setup")
   const [targetZAngle, SetTargetAngle] = useState(45) //Currently hard-coded target angle
   
-  const beepCurrentPlayer = useAudioPlayer(beepSources[0])
-  beepCurrentPlayer.addListener(PLAYBACK_STATUS_UPDATE, playBackStatusUpdate)
-  const beepTargetPlayer = useAudioPlayer(middleBeepSource)
-  beepCurrentPlayer.loop = true
-  beepTargetPlayer.loop = true
+  const beepCurrentPlayer1 = useAudioPlayer(beepSources[1])
+  const beepCurrentPlayer2 = useAudioPlayer(beepSources[1])
+  const beepTargetPlayer1 = useAudioPlayer(beepSources[0])
+  const beepTargetPlayer2 = useAudioPlayer(beepSources[0])
 
   
+
   useEffect(()=>{
       console.log("calibratingEffect")
       if(!calibrationStartedOnce) return;
-      if(calibrating){
-        playCurrentBeep();
-      } else {
-        stopBeeps();
+      let soundInterval
+      if (calibrating){
+          soundInterval = setInterval(playCurrentBeep, 1100)
+      } else{
+          clearInterval(soundInterval)
       }
-
+      return () => {
+          clearInterval(soundInterval)
+      }
   },[calibrating])
-  
+
   const aDiv = 180/8
   function angleToNoteIndex(angle){
     let angleDiff = targetZAngle - angle
     let signedNoteNum = Math.floor(angleDiff/aDiv)
-    let _noteIndex = signedNoteNum >= 0 ? signedNoteNum : 14 + signedNoteNum
+    let _noteIndex = signedNoteNum >= 0 ? signedNoteNum + 1 : 15 + signedNoteNum
     return _noteIndex
   }
 
@@ -168,40 +169,35 @@ export const AngleDataAndCalibration = () => {
   }
 
   function playCurrentBeep(){
-    beepCurrentPlayer.play()
-    setTimeout(playTargetBeep,200)
+      soundPlayerSwitched = !soundPlayerSwitched
+      let nextPlayer = soundPlayerSwitched ? beepCurrentPlayer1 : beepCurrentPlayer2
+      nextPlayer.pause()
+      console.log(currentNoteIndex)
+      nextPlayer.replace(beepSources[currentNoteIndex])
+      nextPlayer.seekTo(0)
+      let player = soundPlayerSwitched ? beepCurrentPlayer2 : beepCurrentPlayer1
+      audioRestart(player)
+      setTimeout(playTargetBeep, 200)
   }
-  function playBackStatusUpdate(event){
-    console.log(beepCurrentPlayer.currentStatus.didJustFinish)
-  }
+  
   function playTargetBeep(){
-    audioRestart(beepTargetPlayer)
-  }
+      let player = soundPlayerSwitched ? beepTargetPlayer2 : beepTargetPlayer1
+      audioRestart(player)
 
-  function stopBeeps(){
-    beepCurrentPlayer.pause()
-    beepTargetPlayer.pause()
-    beepCurrentPlayer.seekTo(0)
-    beepTargetPlayer.seekTo(0)
   }
-  useEffect(()=>{
-    return () => {
-      OnComponentUnmount()
-    }
-  },[])
-
-  const OnComponentUnmount = () => {
-    beepCurrentPlayer.remove()
-    beepTargetPlayer.remove()
-  }
-
   function updateAngleAndNote(){
     let newZ = (noteTestZ+1)%360
+
     noteTestZ = newZ;
-    let newPendingNoteIndex = angleToNoteIndex(noteTestZ)
-    if (newPendingNoteIndex != pendingNoteIndex){
-      pendingNoteIndex = newPendingNoteIndex
-      console.log(newPendingNoteIndex)
+    
+    let newCurrentNoteIndex = angleToNoteIndex(noteTestZ)
+    if (newCurrentNoteIndex != currentNoteIndex){
+      let nextPlayer = soundPlayerSwitched ? beepCurrentPlayer1 : beepCurrentPlayer2
+      currentNoteIndex = newCurrentNoteIndex
+      console.log("Note index switched: "+currentNoteIndex)
+      nextPlayer.pause()
+      nextPlayer.replace(beepSources[currentNoteIndex])
+      nextPlayer.seekTo(0)
     }
   }
   const OnPressCalibrationButton = () => {
