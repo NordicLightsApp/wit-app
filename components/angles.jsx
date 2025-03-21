@@ -68,7 +68,6 @@ export const AngleData = () => {
       setSearching(false);
     }
   }, [deviceName]);
-  console.log(BluetoothModule);
   const startSearch = () => {
     setSearching(true);
     BluetoothModule.startDiscoveryR();
