@@ -86,9 +86,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.jasminfranti.witapi'
+    namespace 'com.nordiclights.app'
     defaultConfig {
-        applicationId 'com.jasminfranti.witapi'
+        applicationId 'com.nordiclights.app'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
@@ -147,9 +147,9 @@ android {
 }
 
 repositories {
-    flatDir {
-        dirs 'libs' // This will tell Gradle to look in the 'libs' directory for .aar files
-    }
+  flatDir {
+    dirs 'libs'
+  }
 }
 
 dependencies {

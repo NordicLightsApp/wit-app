@@ -33,8 +33,6 @@ export const AngleData = () => {
   };
 
   const changeTheme = (preferences) => {
-    /* console.log(preferences.colorScheme);
-    console.log(typeof preferences.colorScheme); */
     switch (preferences.colorScheme) {
       case "dark":
         colors.background = "#000";
@@ -70,7 +68,7 @@ export const AngleData = () => {
       setSearching(false);
     }
   }, [deviceName]);
-
+  console.log(BluetoothModule);
   const startSearch = () => {
     setSearching(true);
     BluetoothModule.startDiscoveryR();
