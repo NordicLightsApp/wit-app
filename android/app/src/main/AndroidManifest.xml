@@ -27,5 +27,6 @@
         <data android:scheme="com.nordiclights.app"/>
       </intent-filter>
     </activity>
+    <service android:name="com.mbientlab.metawear.android.BtleService" />
   </application>
 </manifest>

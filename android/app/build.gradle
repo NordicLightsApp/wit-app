@@ -157,6 +157,8 @@ dependencies {
     implementation("com.facebook.react:react-android")
     implementation("com.facebook.react:react-native:+")
     implementation(name: 'wit-sdk', ext: 'aar')
+    implementation("com.mbientlab:metawear:4.0.0")
+    implementation 'com.mbientlab.bletoolbox:scanner:0.3.1'
 
     def isGifEnabled = (findProperty('expo.gif.enabled') ?: "") == "true";
     def isWebpEnabled = (findProperty('expo.webp.enabled') ?: "") == "true";
