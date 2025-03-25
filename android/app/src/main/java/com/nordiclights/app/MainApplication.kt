@@ -2,6 +2,11 @@ package com.nordiclights.app
 
 import android.app.Application
 import android.content.res.Configuration
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
+import android.os.IBinder
 
 import com.facebook.react.PackageList
 import com.facebook.react.ReactApplication
@@ -16,7 +21,11 @@ import com.facebook.soloader.SoLoader
 import expo.modules.ApplicationLifecycleDispatcher
 import expo.modules.ReactNativeHostWrapper
 
-class MainApplication : Application(), ReactApplication {
+import com.mbientlab.metawear.android.BtleService
+import com.mbientlab.metawear.*
+
+class MainApplication : Application(), ReactApplication, ServiceConnection {
+  private var serviceBinder: BtleService.LocalBinder? = null
 
   override val reactNativeHost: ReactNativeHost = ReactNativeHostWrapper(
         this,
@@ -43,6 +52,8 @@ class MainApplication : Application(), ReactApplication {
 
   override fun onCreate() {
     super.onCreate()
+    applicationContext.bindService(Intent(this, BtleService::class.java),
+                this, Context.BIND_AUTO_CREATE)
     SoLoader.init(this, OpenSourceMergedSoMapping)
     if (BuildConfig.IS_NEW_ARCHITECTURE_ENABLED) {
       // If you opted-in for the New Architecture, we load the native entry point for this app.
@@ -54,5 +65,18 @@ class MainApplication : Application(), ReactApplication {
   override fun onConfigurationChanged(newConfig: Configuration) {
     super.onConfigurationChanged(newConfig)
     ApplicationLifecycleDispatcher.onConfigurationChanged(this, newConfig)
+  }
+
+  override fun onServiceConnected(name: ComponentName, service: IBinder) {
+    // Typecast the binder to the service's LocalBinder class
+    serviceBinder = service as BtleService.LocalBinder
+  }
+
+  override fun onServiceDisconnected(name: ComponentName) { }
+
+  override fun onTerminate() {
+    super.onTerminate()
+    // Unbind the service when the activity is destroyed
+    applicationContext.unbindService(this)
   }
 }
