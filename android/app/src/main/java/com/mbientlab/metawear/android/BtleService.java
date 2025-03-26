@@ -498,7 +498,7 @@ public class BtleService extends Service {
      * @author Eric Tsai
      */
     public class LocalBinder extends Binder {
-        /**
+            /**
          * Instantiates a MetaWearBoard class
          * @param device    BluetoothDevice object corresponding to the target MetaWear board
          * @return MetaWearBoard object

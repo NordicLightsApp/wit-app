@@ -1,10 +1,12 @@
 import { StyleSheet } from "react-native";
 import { AngleData } from "./components/angles";
+import { MwAngles } from "./components/mw_angles";
 
 export default function App() {
   return (
     <>
-      <AngleData />
+      {/* <AngleData /> */}
+      <MwAngles />
     </>
   );
 }

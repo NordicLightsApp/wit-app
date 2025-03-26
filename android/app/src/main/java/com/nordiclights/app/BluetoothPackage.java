@@ -14,7 +14,7 @@ public class BluetoothPackage implements ReactPackage {
     @Override
     public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
         // Return a list of modules that will be available in JavaScript
-        return Arrays.<NativeModule>asList(new BluetoothModule(reactContext));
+        return Arrays.<NativeModule>asList(new BluetoothModule(reactContext), new ServiceBinderModule(reactContext));
     }
 
     @Override
