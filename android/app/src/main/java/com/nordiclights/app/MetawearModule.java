@@ -30,9 +30,8 @@ import com.mbientlab.metawear.builder.RouteComponent;
 import com.mbientlab.metawear.builder.filter.Comparison;
 import com.mbientlab.metawear.builder.filter.ThresholdOutput;
 import com.mbientlab.metawear.builder.function.Function1;
-import com.mbientlab.metawear.module.Accelerometer;
-import com.mbientlab.metawear.module.Debug;
-import com.mbientlab.metawear.module.Logging;
+import com.mbientlab.metawear.module.*;
+import com.mbientlab.metawear.DeviceInformation;
 
 import bolts.Continuation;
 import bolts.Task;
@@ -43,6 +42,7 @@ public class MetawearModule extends ReactContextBaseJavaModule implements Servic
     private static final String LOG_TAG = "freefall";
     private MetaWearBoard mwBoard;
     private Accelerometer accelerometer;
+    private DeviceInformation deviceInfo;
     private Debug debug;
     private Logging logging;
 
@@ -90,6 +90,8 @@ public class MetawearModule extends ReactContextBaseJavaModule implements Servic
             return null;
         });
     }
+
+    
 
     @Override
     public void onServiceDisconnected(ComponentName componentName) {
@@ -141,12 +143,22 @@ public class MetawearModule extends ReactContextBaseJavaModule implements Servic
         }
     }
 
-
-
-
-    
-
-
+    @ReactMethod
+    public String getManufacturer() {
+        if (mwBoard != null) {
+            try {
+                // Use a synchronous task to block until the result is available
+                DeviceInformation deviceInfo = mwBoard.readDeviceInformationAsync().getResult();
+                return deviceInfo.manufacturer;
+            } catch (Exception e) {
+                Log.e(LOG_TAG, "Failed to read device information", e);
+                return "Error: Failed to read device information";
+            }
+        } else {
+            Log.e(LOG_TAG, "MetaWearBoard is not initialized");
+            return "Error: MetaWearBoard is not initialized";
+        }
+    }
   
 
 

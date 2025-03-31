@@ -20,9 +20,8 @@ export const MwAngles = () => {
   var metawearBoard = null;
   var serviceBinder = null;
 
-  var accelerometer = false;
 
-
+  const [accelerometer, setaccelerometer] = useState(false);
 
   var colors = {
     background: "#FFF",
@@ -31,17 +30,21 @@ export const MwAngles = () => {
     gray: "#D9D9D6",
     secondary: "#32C8BE",
     complementary: "#A9D52D",
-  };
+  }
 
-  const startAccelerometer = () => {
-    accelerometer = true;
-    // start the accelerometer
-    MetawearModule.startAccelerometer();}
+  const toggleAccelerometer = () => {
+    if (accelerometer == false) {
+      MetawearModule.startAccelerometer();
+      setaccelerometer(true);
+    } else {
+      MetawearModule.stopAccelerometer();
+      setaccelerometer(false);
+    }
+  }
 
-  const stopAccelerometer = () => {
-    accelerometer = false;
-    // stop the accelerometer
-    MetawearModule.stopAccelerometer();}
+  const getBoardName = () => {
+    return MetawearModule.getManufacturer();
+  }
 
   const changeTheme = (preferences) => {
     switch (preferences.colorScheme){
@@ -68,12 +71,17 @@ changeTheme({colorScheme: Appearance.getColorScheme()});
     <Text style={{ color: colors.foreground }}>
       Click to start discovering devices
     </Text>
+    <Text style={{ color: colors.foreground }}>
+      {getBoardName()}
+    </Text> 
     <Button
         color={colors.primary}
         title="Start search"
-        disabled = {accelerometer}
-        onPress={startAccelerometer}
+        onPress={toggleAccelerometer}
       />
+      <Text style={{ color: colors.foreground }}>
+      {accelerometer==true ? "Accelerometer started" : "Accelerometer stopped"}
+    </Text>
   </View>
   );
 };
