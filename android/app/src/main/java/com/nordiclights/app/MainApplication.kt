@@ -35,6 +35,7 @@ class MainApplication : Application(), ReactApplication, ServiceConnection {
             // Packages that cannot be autolinked yet can be added manually here, for example:
             // packages.add(new MyReactNativePackage());
             packages.add(BluetoothPackage())
+            // packages.add(MetawearPackage())
             return packages
           }
 
@@ -79,4 +80,9 @@ class MainApplication : Application(), ReactApplication, ServiceConnection {
     // Unbind the service when the activity is destroyed
     applicationContext.unbindService(this)
   }
+
+  fun getServiceBinder(): BtleService.LocalBinder? {
+    return serviceBinder
+}
+
 }
