@@ -13,15 +13,12 @@ import {
 export const MwAngles = () => {
 
   const { MetawearModule } = NativeModules;
+  const [manufacturer, setManufacturer] = useState("");
 
+  const [x, setX] = useState(0.0);
+  const [y, setY] = useState(0.0);
+  const [z, setZ] = useState(0.0);
 
-  // Var for the sensor
-  var bluethoothDevice = null;
-  var metawearBoard = null;
-  var serviceBinder = null;
-
-
-  const [accelerometer, setaccelerometer] = useState(false);
 
   var colors = {
     background: "#FFF",
@@ -32,19 +29,35 @@ export const MwAngles = () => {
     complementary: "#A9D52D",
   }
 
-  const toggleAccelerometer = () => {
-    if (accelerometer == false) {
-      MetawearModule.startAccelerometer();
-      setaccelerometer(true);
-    } else {
-      MetawearModule.stopAccelerometer();
-      setaccelerometer(false);
-    }
+  const getBoardName = async () => {
+    const result = await MetawearModule.getManufacturer();
+    setManufacturer(result);
   }
 
-  const getBoardName = () => {
-    return MetawearModule.getManufacturer();
+  const refreshAccelerometer = async () => {
+    MetawearModule.refreshAxis();
   }
+
+  const refreshData = () => {
+    const latestX = MetawearModule.getX();
+    const latestY = MetawearModule.getY();
+    const latestZ = MetawearModule.getZ();
+
+    setX(latestX);
+    setY(latestY);
+    setZ(latestZ);
+  };
+
+  useEffect(() => {
+    // Set up an interval to fetch data every 500ms
+    const interval = setInterval(() => {
+      refreshData();
+    }, 500);
+
+    // Clear the interval when the component unmounts
+    return () => clearInterval(interval);
+  }, []);
+
 
   const changeTheme = (preferences) => {
     switch (preferences.colorScheme){
@@ -60,28 +73,64 @@ export const MwAngles = () => {
     }
   };
 
+  const reconnectToDevice = async () => {
+    const message = await MetawearModule.connectAsync()
+      .then((message) => {
+        setStatus(message);
+      })
+      .catch((error) => {
+        setStatus(error.message);
+      });
+  };
+
 Appearance.addChangeListener(changeTheme);
 
-changeTheme({colorScheme: Appearance.getColorScheme()});
+useEffect(() => {
+  changeTheme({ colorScheme: Appearance.getColorScheme() });
+}, []);
 
 
   return (
 
   <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <Button 
+      title="Connect to device"
+      color={colors.primary}
+      onPress={reconnectToDevice}  
+    />
+    
     <Text style={{ color: colors.foreground }}>
       Click to start discovering devices
     </Text>
-    <Text style={{ color: colors.foreground }}>
-      {getBoardName()}
-    </Text> 
     <Button
-        color={colors.primary}
-        title="Start search"
-        onPress={toggleAccelerometer}
-      />
-      <Text style={{ color: colors.foreground }}>
-      {accelerometer==true ? "Accelerometer started" : "Accelerometer stopped"}
+      title = "Fetch Board Name"
+      color={colors.primary}
+      onPress={getBoardName}  
+
+  />
+    <Text style={{ color: colors.foreground }}>
+      {manufacturer}
     </Text>
+    <Button 
+      title="Start Accelerometer"
+      color={colors.primary}
+      onPress={refreshAccelerometer}  
+    />
+    <Button 
+      title="Refresh data"
+      color={colors.primary}
+      onPress={refreshData}  
+    />
+    <Text style={{ color: colors.foreground }}>
+        X: {x.toFixed(2)} {/* Format float to 2 decimal places */}
+      </Text>
+      <Text style={{ color: colors.foreground }}>
+        Y: {y.toFixed(2)} {/* Format float to 2 decimal places */}
+      </Text>
+      <Text style={{ color: colors.foreground }}>
+        Z: {z.toFixed(2)} {/* Format float to 2 decimal places */}
+      </Text>
+
   </View>
   );
 };
