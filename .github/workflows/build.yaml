@@ -30,7 +30,7 @@ jobs:
           ./gradlew clean
 
       - name: Build APK
-        run: ./gradlew assembleRelease
+        run: ./gradlew build
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
