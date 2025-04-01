@@ -30,7 +30,9 @@ jobs:
           ./gradlew clean
 
       - name: Build APK
-        run: ./android/gradlew build
+        run: |
+          cd android
+          ./gradlew build
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
