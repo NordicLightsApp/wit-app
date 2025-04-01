@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { AngleData } from "./components/angles";
+import { AngleData } from "../components/angles";
 
 export default function App() {
   return (
