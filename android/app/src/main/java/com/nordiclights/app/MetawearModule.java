@@ -149,7 +149,8 @@ public class MetawearModule extends ReactContextBaseJavaModule implements Servic
             try {
                 // Use a synchronous task to block until the result is available
                 DeviceInformation deviceInfo = mwBoard.readDeviceInformationAsync().getResult();
-                return deviceInfo.manufacturer;
+                // Extract the manufacturer information from the DeviceInformation object
+                return deviceInfo.toString();
             } catch (Exception e) {
                 Log.e(LOG_TAG, "Failed to read device information", e);
                 return "Error: Failed to read device information";
