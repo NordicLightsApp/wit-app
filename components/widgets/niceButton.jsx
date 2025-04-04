@@ -7,6 +7,9 @@ export const NiceButton = ({ children, onPress }) => (
       backgroundColor: colors.primary,
       padding: 12,
       borderRadius: 50,
+      alignItems: "center",
+      justifyContent: "center",
+      marginHorizontal: 24,
     }}
     onPress={() => onPress()}
   >

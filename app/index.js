@@ -41,7 +41,7 @@ export default function WelcomeScreen() {
             flex: 1,
           }}
         >
-          <NiceButton onPress={() => router.navigate("./App")}>
+          <NiceButton onPress={() => router.navigate("./SetupValues")}>
             <Text>Click me!</Text>
           </NiceButton>
         </View>
