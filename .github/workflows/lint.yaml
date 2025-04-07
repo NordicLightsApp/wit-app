@@ -24,7 +24,5 @@ jobs:
       - name: Run Lint
         uses: super-linter/super-linter@v6
         env:
-          VALIDATE_ALL_CODEBASE: false
-          VALIDATE_JAVASCRIPT_ES: true
-          VALIDATE_JSX: true
+          VALIDATE_ALL_CODEBASE: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
