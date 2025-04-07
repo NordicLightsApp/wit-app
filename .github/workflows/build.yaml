@@ -3,13 +3,10 @@ name: Build APK
 on:
   push:
     branches:
-      - ci/cd
-  pull_request:
-    branches:
-      - ci/cd
+      - master
 
 jobs:
-  build:
+  Build:
     runs-on: ubuntu-latest
 
     steps:
