@@ -27,11 +27,15 @@ const beepSources = [
     require(keyboardPath+"beepHighCs.wav"),
     require(keyboardPath+"beepHighDs.wav"),
     require(keyboardPath+"beepHighE.wav"),
+
+    require("./angleCorrectSound.wav")
+
 ]
 let pendingNoteIndex = 0
 let playingNoteIndex = 0
 let soundPlayerSwitched = false
 let noteTestZ = 0
+let player1waiting = false, player2waiting = false;
 
 export const AngleDataAndCalibration = () => {
   const { BluetoothModule } = NativeModules;
@@ -135,12 +139,15 @@ export const AngleDataAndCalibration = () => {
   const [calibrationButtonTitle, SetText] = useState("Start angle setup")
   const [targetZAngle, SetTargetAngle] = useState(45) //Currently hard-coded target angle
   
-  const beepCurrentPlayer = useAudioPlayer(beepSources[0])
-  beepCurrentPlayer.addListener(PLAYBACK_STATUS_UPDATE, playBackStatusUpdate)
-  const beepTargetPlayer = useAudioPlayer(middleBeepSource)
-  beepCurrentPlayer.loop = true
-  beepTargetPlayer.loop = true
+  const beepCurrentPlayer1 = useAudioPlayer(beepSources[0])
+  const beepCurrentPlayer2 = useAudioPlayer(beepSources[0])
+  beepCurrentPlayer1.setPlaybackRate(3)
+  beepCurrentPlayer2.setPlaybackRate(3)
+  beepCurrentPlayer1.addListener(PLAYBACK_STATUS_UPDATE, playBackStatusUpdate1)
+  beepCurrentPlayer2.addListener(PLAYBACK_STATUS_UPDATE, playBackStatusUpdate2)
 
+  const angleCorrectWindow = 10.0
+  const halfAngleCorrectWindow = angleCorrectWindow*0.5
   
   useEffect(()=>{
       console.log("calibratingEffect")
@@ -153,11 +160,23 @@ export const AngleDataAndCalibration = () => {
 
   },[calibrating])
   
-  const aDiv = 180/8
+  const angleDiv = (180-(halfAngleCorrectWindow))/7
   function angleToNoteIndex(angle){
-    let angleDiff = targetZAngle - angle
-    let signedNoteNum = Math.floor(angleDiff/aDiv)
-    let _noteIndex = signedNoteNum >= 0 ? signedNoteNum : 14 + signedNoteNum
+    let angleDiff1 = targetZAngle - angle
+    let angleDiff2 = targetZAngle + 360 - angle
+    let angleDiff = Math.abs(angleDiff1) < Math.abs(angleDiff2) ? angleDiff1 : angleDiff2
+
+    let absDiff = Math.abs(angleDiff)
+    let _noteIndex
+    if (absDiff <= halfAngleCorrectWindow){
+      _noteIndex = 14
+    }
+    else {
+      let angleDiffFromCorrect = angleDiff + halfAngleCorrectWindow * (angleDiff >= 0 ? -1 : 1) 
+      let signedNoteNum = Math.floor(angleDiffFromCorrect/angleDiv)
+      _noteIndex = 7+signedNoteNum
+    }
+    
     return _noteIndex
   }
 
@@ -168,21 +187,38 @@ export const AngleDataAndCalibration = () => {
   }
 
   function playCurrentBeep(){
-    beepCurrentPlayer.play()
-    setTimeout(playTargetBeep,200)
+    beepCurrentPlayer1.play()
   }
-  function playBackStatusUpdate(event){
-    console.log(beepCurrentPlayer.currentStatus.didJustFinish)
+  function playBackStatusUpdate1(event){
+    if (event.playing){
+      player1waiting = false
+    }
+    if (event.didJustFinish && !player1waiting){
+      player1waiting = true
+      beepCurrentPlayer1.pause()
+      beepCurrentPlayer1.replace(beepSources[pendingNoteIndex])
+      beepCurrentPlayer1.seekTo(0)
+      beepCurrentPlayer2.play()
+    }
   }
-  function playTargetBeep(){
-    audioRestart(beepTargetPlayer)
+  function playBackStatusUpdate2(event){
+    if (event.playing){
+      player2waiting = false
+    }
+    if (event.didJustFinish && !player2waiting){
+      player2waiting = true
+      beepCurrentPlayer2.pause()
+      beepCurrentPlayer2.replace(beepSources[pendingNoteIndex])
+      beepCurrentPlayer2.seekTo(0)
+      beepCurrentPlayer1.play()
+    }
   }
 
   function stopBeeps(){
-    beepCurrentPlayer.pause()
-    beepTargetPlayer.pause()
-    beepCurrentPlayer.seekTo(0)
-    beepTargetPlayer.seekTo(0)
+    beepCurrentPlayer1.pause()
+    beepCurrentPlayer2.pause()
+    beepCurrentPlayer1.seekTo(0)
+    beepCurrentPlayer2.seekTo(0)
   }
   useEffect(()=>{
     return () => {
@@ -191,8 +227,8 @@ export const AngleDataAndCalibration = () => {
   },[])
 
   const OnComponentUnmount = () => {
-    beepCurrentPlayer.remove()
-    beepTargetPlayer.remove()
+    beepCurrentPlayer1.remove()
+    beepCurrentPlayer2.remove()
   }
 
   function updateAngleAndNote(){
@@ -201,6 +237,7 @@ export const AngleDataAndCalibration = () => {
     let newPendingNoteIndex = angleToNoteIndex(noteTestZ)
     if (newPendingNoteIndex != pendingNoteIndex){
       pendingNoteIndex = newPendingNoteIndex
+      console.log(noteTestZ)
       console.log(newPendingNoteIndex)
     }
   }
