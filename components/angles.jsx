@@ -99,7 +99,7 @@ export const AngleData = () => {
   };
 
   const zeroAngles = () => {
-    setValueX(+angleX.replace(",", "."));
+    setValueX(+angleX.replace(",", '.'))
     setValueY(+angleY.replace(",", "."));
     setValueZ(+angleZ.replace(",", "."));
     setZeroedX(0);
