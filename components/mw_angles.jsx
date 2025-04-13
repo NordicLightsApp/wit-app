@@ -19,6 +19,8 @@ export const MwAngles = () => {
   const [y, setY] = useState(0.0);
   const [z, setZ] = useState(0.0);
 
+  const [status, setStatus] = useState(false);
+
 
   var colors = {
     background: "#FFF",
@@ -50,6 +52,7 @@ export const MwAngles = () => {
 
   useEffect(() => {
     // Set up an interval to fetch data every 500ms
+    if(!status) { return;}
     const interval = setInterval(() => {
       refreshData();
     }, 500);
@@ -77,9 +80,11 @@ export const MwAngles = () => {
     const message = await MetawearModule.connectAsync()
       .then((message) => {
         setStatus(message);
+        setStatus(true);
       })
       .catch((error) => {
         setStatus(error.message);
+        setStatus(false);
       });
   };
 
@@ -100,7 +105,7 @@ useEffect(() => {
     />
     
     <Text style={{ color: colors.foreground }}>
-      Click to start discovering devices
+      Click to start discovering devices{status.toString()}
     </Text>
     <Button
       title = "Fetch Board Name"

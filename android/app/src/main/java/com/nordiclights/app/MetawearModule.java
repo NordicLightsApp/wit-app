@@ -43,7 +43,7 @@ public class MetawearModule extends ReactContextBaseJavaModule implements Servic
 
     private BtleService.LocalBinder serviceBinder;
     private static final String LOG_TAG = "MetawearModule";
-    private static final String MW_MAC_ADDRESS = "F2:10:8A:6B:6F:5D"; // Replace with your board's MAC address
+    private static final String MW_MAC_ADDRESS = "CD:80:DA:BF:54:66"; // Replace with your board's MAC address
     private MetaWearBoard mwBoard;
     private Accelerometer accelerometer;
     private DeviceInformation deviceInfo;
@@ -70,7 +70,7 @@ public class MetawearModule extends ReactContextBaseJavaModule implements Servic
         serviceBinder = (BtleService.LocalBinder) service;
 
         // Replace with your board's MAC address
-        String mwMacAddress = "F2:10:8A:6B:6F:5D";
+        String mwMacAddress = MW_MAC_ADDRESS;
         BluetoothManager btManager = (BluetoothManager) getReactApplicationContext().getSystemService(Context.BLUETOOTH_SERVICE);
         BluetoothDevice btDevice = btManager.getAdapter().getRemoteDevice(mwMacAddress);
 

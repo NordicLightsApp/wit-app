@@ -35,7 +35,7 @@ class MainApplication : Application(), ReactApplication, ServiceConnection {
             // Packages that cannot be autolinked yet can be added manually here, for example:
             // packages.add(new MyReactNativePackage());
             packages.add(BluetoothPackage())
-            // packages.add(MetawearPackage())
+            packages.add(MetawearPackage())
             return packages
           }
 

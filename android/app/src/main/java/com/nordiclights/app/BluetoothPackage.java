@@ -15,8 +15,7 @@ public class BluetoothPackage implements ReactPackage {
     public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
         // Return a list of modules that will be available in JavaScript
         return Arrays.<NativeModule>asList(
-            new BluetoothModule(reactContext), // Keep this if it's required
-            new MetawearModule(reactContext)   // Replace ServiceBinderModule with MetawearModule
+            new BluetoothModule(reactContext) // Keep this if it's required
         );
     }
 
