@@ -35,6 +35,9 @@ import com.mbientlab.metawear.builder.function.Function1;
 import com.mbientlab.metawear.module.*;
 import com.mbientlab.metawear.DeviceInformation;
 import com.mbientlab.metawear.data.Acceleration;
+import com.mbientlab.metawear.data.AngularVelocity;
+import com.mbientlab.metawear.module.Gyro;
+
 
 import bolts.Continuation;
 import bolts.Task;
@@ -53,6 +56,12 @@ public class MetawearModule extends ReactContextBaseJavaModule implements Servic
     private float latestXAxis = 0.0f;
     private float latestYAxis = 0.0f;
     private float latestZAxis = 0.0f;   
+
+    private float pitch = 0.0f;
+    private float roll = 0.0f;
+    private float yaw = 0.0f;
+
+
 
     public MetawearModule(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -162,6 +171,23 @@ public class MetawearModule extends ReactContextBaseJavaModule implements Servic
         return latestZAxis;
     }
 
+    @ReactMethod
+    public float getPitch(){
+        return pitch;
+    }
+
+    @ReactMethod
+    public float getRoll(){
+        return roll;
+    }
+
+    @ReactMethod
+    public float getYaw(){
+        return yaw;
+    }
+
+
+
     public static Task<Void> reconnect(final MetaWearBoard board) {
         return board.connectAsync().continueWithTask(task -> task.isFaulted() ? reconnect(board) : task);
     }
@@ -211,6 +237,61 @@ public class MetawearModule extends ReactContextBaseJavaModule implements Servic
             });
         } else {
             Log.e(LOG_TAG, "MetaWearBoard is not initialized");
+            promise.reject("BOARD_NOT_INITIALIZED", "MetaWearBoard is not initialized");
+        }
+    }
+
+    @ReactMethod
+    public void getInclination(Promise promise) {
+        if (mwBoard != null) {
+            try {
+                // Retrieve the gyroscope module
+                Gyro gyro = mwBoard.getModule(Gyro.class);
+                if (gyro == null) {
+                    promise.reject("GYRO_NOT_AVAILABLE", "Gyro module is not available");
+                    return;
+                }
+
+                // Configure the gyroscope
+                gyro.configure()
+                    .odr(Gyro.OutputDataRate.ODR_50_HZ) // Set output data rate to 50Hz
+                    .range(Gyro.Range.FSR_2000)         // Set range to ±2000 degrees/second
+                    .commit();
+
+                // Start the gyroscope and set up a route to stream data
+                
+                gyro.angularVelocity().addRouteAsync(new RouteBuilder() {
+                    @Override
+                    public void configure(RouteComponent source) {
+                        source.stream(new Subscriber() {
+                            @Override
+                            public void apply(Data data, Object... env) {
+                                // Retrieve angular velocity data
+                                AngularVelocity angularVelocity = data.value(AngularVelocity.class);
+                                pitch = angularVelocity.x(); // Pitch (rotation around X-axis)
+                                roll = angularVelocity.y();  // Roll (rotation around Y-axis)
+                                yaw = angularVelocity.z();   // Yaw (rotation around Z-axis)
+                            }
+                        });
+                    }
+                }).continueWith(task -> {
+                    if (task.isFaulted()) {
+                        Log.e(LOG_TAG, "Failed to set up gyroscope route", task.getError());
+                        promise.reject("GYRO_ROUTE_ERROR", "Failed to set up gyroscope route");
+                    } else {
+                        Log.i(LOG_TAG, "Gyroscope route set up successfully");
+                    }
+                    return null;
+                });
+
+                gyro.start();
+                gyro.angularVelocity().start();
+
+            } catch (Exception e) {
+                Log.e(LOG_TAG, "Failed to start gyroscope", e);
+                promise.reject("GYRO_START_ERROR", "Failed to start gyroscope");
+            }
+        } else {
             promise.reject("BOARD_NOT_INITIALIZED", "MetaWearBoard is not initialized");
         }
     }

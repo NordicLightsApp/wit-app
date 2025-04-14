@@ -8,6 +8,7 @@ import {
     Text,
     View,
   } from "react-native";
+import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
 
 
 export const MwAngles = () => {
@@ -19,7 +20,15 @@ export const MwAngles = () => {
   const [y, setY] = useState(0.0);
   const [z, setZ] = useState(0.0);
 
+  const [latestX, setLatestX] = useState(0.0);
+  const [latestY, setLatestY] = useState(0.0);
+  const [latestZ, setLatestZ] = useState(0.0);
+
   const [status, setStatus] = useState(false);
+
+  const [pitch, setPitch] = useState(0.0);
+  const [roll, setRoll] = useState(0.0);
+  const [yaw, setYaw] = useState(0.0);
 
 
   var colors = {
@@ -38,28 +47,56 @@ export const MwAngles = () => {
 
   const refreshAccelerometer = async () => {
     MetawearModule.refreshAxis();
+    MetawearModule.getInclination();
   }
 
   const refreshData = () => {
-    const latestX = MetawearModule.getX();
-    const latestY = MetawearModule.getY();
-    const latestZ = MetawearModule.getZ();
 
-    setX(latestX);
-    setY(latestY);
-    setZ(latestZ);
+    setX(MetawearModule.getX());
+    setY(MetawearModule.getY());
+    setZ(MetawearModule.getZ());
   };
+
+  const setDefault = () => {
+    setLatestX(x);
+    setLatestY(y);
+    setLatestZ(z);
+  }
+  
+  const getInclinaison = async () => {
+    try {
+      const pitchValue = await MetawearModule.getPitch();
+      const rollValue = await MetawearModule.getRoll();
+      const yawValue = await MetawearModule.getYaw();
+  
+      console.log("Pitch:", pitchValue, "Roll:", rollValue, "Yaw:", yawValue);
+  
+      setPitch(pitchValue);
+      setRoll(rollValue);
+      setYaw(yawValue);
+    } catch (error) {
+      console.error("Error fetching inclination data:", error);
+    }
+  };
+
 
   useEffect(() => {
     // Set up an interval to fetch data every 500ms
-    if(!status) { return;}
     const interval = setInterval(() => {
       refreshData();
+      getInclinaison();
     }, 500);
+
+
+
 
     // Clear the interval when the component unmounts
     return () => clearInterval(interval);
   }, []);
+
+
+
+
 
 
   const changeTheme = (preferences) => {
@@ -122,18 +159,23 @@ useEffect(() => {
       onPress={refreshAccelerometer}  
     />
     <Button 
-      title="Refresh data"
+      title="Set Default"
       color={colors.primary}
-      onPress={refreshData}  
+      onPress={setDefault}  
     />
     <Text style={{ color: colors.foreground }}>
-        X: {x.toFixed(2)} {/* Format float to 2 decimal places */}
+        X: {(x - latestX).toFixed(2)} {/* Format float to 2 decimal places */}
       </Text>
       <Text style={{ color: colors.foreground }}>
-        Y: {y.toFixed(2)} {/* Format float to 2 decimal places */}
+        Y: {(y - latestY).toFixed(2)} {/* Format float to 2 decimal places */}
       </Text>
       <Text style={{ color: colors.foreground }}>
-        Z: {z.toFixed(2)} {/* Format float to 2 decimal places */}
+        Z: {(z - latestZ).toFixed(2)} {/* Format float to 2 decimal places */}
+      </Text>
+      <Text style={{ color: colors.foreground }}>
+        Pitch : {pitch.toFixed(2)} {"\n"}
+        Roll : {roll.toFixed(2)}{"\n"}
+        Yaw : {yaw.toFixed(2)}
       </Text>
 
   </View>
