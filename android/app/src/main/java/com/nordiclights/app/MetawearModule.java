@@ -37,6 +37,8 @@ import com.mbientlab.metawear.DeviceInformation;
 import com.mbientlab.metawear.data.Acceleration;
 import com.mbientlab.metawear.data.AngularVelocity;
 import com.mbientlab.metawear.module.Gyro;
+import com.mbientlab.metawear.module.SensorFusionBosch;
+import com.mbientlab.metawear.data.EulerAngles;
 
 
 import bolts.Continuation;
@@ -60,6 +62,10 @@ public class MetawearModule extends ReactContextBaseJavaModule implements Servic
     private float pitch = 0.0f;
     private float roll = 0.0f;
     private float yaw = 0.0f;
+
+    private float EulerAngleX = 0.0f;
+    private float EulerAngleY = 0.0f;
+    private float EulerAngleZ = 0.0f;
 
 
 
@@ -186,6 +192,21 @@ public class MetawearModule extends ReactContextBaseJavaModule implements Servic
         return yaw;
     }
 
+    @ReactMethod
+    public float getEulerAngleX(){
+        return EulerAngleX;
+    }
+
+    @ReactMethod
+    public float getEulerAngleY(){
+        return EulerAngleY;
+    }
+
+    @ReactMethod
+    public float getEulerAngleZ(){
+        return EulerAngleZ;
+    }
+
 
 
     public static Task<Void> reconnect(final MetaWearBoard board) {
@@ -290,6 +311,60 @@ public class MetawearModule extends ReactContextBaseJavaModule implements Servic
             } catch (Exception e) {
                 Log.e(LOG_TAG, "Failed to start gyroscope", e);
                 promise.reject("GYRO_START_ERROR", "Failed to start gyroscope");
+            }
+        } else {
+            promise.reject("BOARD_NOT_INITIALIZED", "MetaWearBoard is not initialized");
+        }
+    }
+
+    @ReactMethod
+    public void getEulerAngles(Promise promise) {
+        if (mwBoard != null) {
+            try {
+                // Retrieve the sensor fusion module
+                SensorFusionBosch sensorFusion = mwBoard.getModule(SensorFusionBosch.class);
+                if (sensorFusion == null) {
+                    promise.reject("SENSOR_FUSION_NOT_AVAILABLE", "Sensor Fusion module is not available");
+                    return;
+                }
+    
+                // Configure the sensor fusion module to calculate Euler angles
+                sensorFusion.configure()
+                    .mode(SensorFusionBosch.Mode.NDOF)
+                    .commit();
+    
+                // Start the sensor fusion module
+                sensorFusion.eulerAngles().addRouteAsync(new RouteBuilder() {
+                    @Override
+                    public void configure(RouteComponent source) {
+                        source.stream(new Subscriber() {
+                            @Override
+                            public void apply(Data data, Object... env) {
+                                // Retrieve Euler angles
+                                EulerAngles eulerAngles = data.value(EulerAngles.class);
+                                EulerAngleX= eulerAngles.pitch();       // Pitch angle
+                                EulerAngleY = eulerAngles.roll();       // Roll angle
+                                EulerAngleZ = eulerAngles.yaw();        // Yaw angle
+
+                            }
+                        });
+                    }
+                }).continueWith(task -> {
+                    if (task.isFaulted()) {
+                        Log.e(LOG_TAG, "Failed to set up Euler angles route", task.getError());
+                        promise.reject("EULER_ROUTE_ERROR", "Failed to set up Euler angles route");
+                    } else {
+                        Log.i(LOG_TAG, "Euler angles route set up successfully");
+                    }
+                    return null;
+                });
+    
+                sensorFusion.eulerAngles().start();
+                sensorFusion.start();
+    
+            } catch (Exception e) {
+                Log.e(LOG_TAG, "Failed to start sensor fusion for Euler angles", e);
+                promise.reject("SENSOR_FUSION_ERROR", "Failed to start sensor fusion for Euler angles");
             }
         } else {
             promise.reject("BOARD_NOT_INITIALIZED", "MetaWearBoard is not initialized");

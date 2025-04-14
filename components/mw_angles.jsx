@@ -30,6 +30,10 @@ export const MwAngles = () => {
   const [roll, setRoll] = useState(0.0);
   const [yaw, setYaw] = useState(0.0);
 
+  const [EulerAngleX, setEulerAngleX] = useState(0.0);
+  const [EulerAngleY, setEulerAngleY] = useState(0.0);
+  const [EulerAngleZ, setEulerAngleZ] = useState(0.0);
+
 
   var colors = {
     background: "#FFF",
@@ -69,8 +73,6 @@ export const MwAngles = () => {
       const rollValue = await MetawearModule.getRoll();
       const yawValue = await MetawearModule.getYaw();
   
-      console.log("Pitch:", pitchValue, "Roll:", rollValue, "Yaw:", yawValue);
-  
       setPitch(pitchValue);
       setRoll(rollValue);
       setYaw(yawValue);
@@ -79,17 +81,28 @@ export const MwAngles = () => {
     }
   };
 
+  const getEulerAngles = async () => {
+    try {
+      const eulerX = await MetawearModule.getEulerAngleX();
+      const eulerY = await MetawearModule.getEulerAngleY();
+      const eulerZ = await MetawearModule.getEulerAngleZ();
+  
+      setEulerAngleX(eulerX);
+      setEulerAngleY(eulerY);
+      setEulerAngleZ(eulerZ);
+    } catch (error) {
+      console.error("Error fetching Euler angles:", error);
+    }
+  }
+
 
   useEffect(() => {
     // Set up an interval to fetch data every 500ms
     const interval = setInterval(() => {
       refreshData();
       getInclinaison();
+      getEulerAngles();
     }, 500);
-
-
-
-
     // Clear the interval when the component unmounts
     return () => clearInterval(interval);
   }, []);
@@ -176,6 +189,11 @@ useEffect(() => {
         Pitch : {pitch.toFixed(2)} {"\n"}
         Roll : {roll.toFixed(2)}{"\n"}
         Yaw : {yaw.toFixed(2)}
+      </Text>
+      <Text style={{ color: colors.foreground }}>
+        Euler Angle X: {EulerAngleX.toFixed(2)} {"\n"}
+        Euler Angle Y: {EulerAngleY.toFixed(2)} {"\n"}
+        Euler Angle Z: {EulerAngleZ.toFixed(2)}
       </Text>
 
   </View>
