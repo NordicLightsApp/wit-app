@@ -275,7 +275,7 @@ public class MetawearModule extends ReactContextBaseJavaModule implements Servic
 
                 // Configure the gyroscope
                 gyro.configure()
-                    .odr(Gyro.OutputDataRate.ODR_50_HZ) // Set output data rate to 50Hz
+                    .odr(Gyro.OutputDataRate.ODR_800_HZ) // Set output data rate to 50Hz
                     .range(Gyro.Range.FSR_2000)         // Set range to ±2000 degrees/second
                     .commit();
 

@@ -69,6 +69,8 @@ export const MwAngles = () => {
   
   const getInclinaison = async () => {
     try {
+      MetawearModule.getEulerAngles();
+
       const pitchValue = await MetawearModule.getPitch();
       const rollValue = await MetawearModule.getRoll();
       const yawValue = await MetawearModule.getYaw();
@@ -86,6 +88,7 @@ export const MwAngles = () => {
       const eulerX = await MetawearModule.getEulerAngleX();
       const eulerY = await MetawearModule.getEulerAngleY();
       const eulerZ = await MetawearModule.getEulerAngleZ();
+
   
       setEulerAngleX(eulerX);
       setEulerAngleY(eulerY);
@@ -155,7 +158,7 @@ useEffect(() => {
     />
     
     <Text style={{ color: colors.foreground }}>
-      Click to start discovering devices{status.toString()}
+      Device status : {status ? "Connected" : "Disconnected"}
     </Text>
     <Button
       title = "Fetch Board Name"
@@ -191,9 +194,9 @@ useEffect(() => {
         Yaw : {yaw.toFixed(2)}
       </Text>
       <Text style={{ color: colors.foreground }}>
-        Euler Angle X: {EulerAngleX.toFixed(2)} {"\n"}
-        Euler Angle Y: {EulerAngleY.toFixed(2)} {"\n"}
-        Euler Angle Z: {EulerAngleZ.toFixed(2)}
+        Euler Angle X: {Math.round(EulerAngleX)} {"\n"}
+        Euler Angle Y: {Math.round(EulerAngleY)} {"\n"}
+        Euler Angle Z: {Math.round(EulerAngleZ)}
       </Text>
 
   </View>
