@@ -37,9 +37,6 @@ let soundPlayerSwitched = false
 let noteTestZ = 0
 let player1waiting = false, player2waiting = false;
 
-let zeroedZTest; //TEMP
-
-
 export const AngleDataAndCalibration = () => {
   const { BluetoothModule } = NativeModules;
   const [deviceName, setDeviceName] = useState("");
@@ -67,12 +64,12 @@ export const AngleDataAndCalibration = () => {
   }, []);
 
   useEffect(() => {
-    //console.log("updateAnglesEffect")
+    console.log("updateAnglesEffect")
     updateAngles();
   }, [angleX]);
 
   useEffect(() => {
-    //console.log("deviceNameEffect")
+    console.log("deviceNameEffect")
     if (deviceName) {
       setSearching(false);
     }
@@ -96,8 +93,9 @@ export const AngleDataAndCalibration = () => {
     setAngleX(x);
     setAngleY(y);
     setAngleZ(z);
-    console.log(zeroedZTest)
-    UpdateAngleAndNote(); //Temp sound test
+
+    
+    updateAngleAndNote(); //Temp sound test
     
   };
 
@@ -125,9 +123,7 @@ export const AngleDataAndCalibration = () => {
       setZeroedY(calculatedY.toFixed(2));
       let z = Number(angleZ.replace(",", "."));
       let calculatedZ = z - valueZ;
-      let fixedZ = calculatedZ.toFixed(2);
-      setZeroedZ(fixedZ);
-      zeroedZTest = fixedZ;
+      setZeroedZ(calculatedZ.toFixed(2));
     }
   };
 
@@ -152,9 +148,9 @@ export const AngleDataAndCalibration = () => {
 
   const angleCorrectWindow = 10.0
   const halfAngleCorrectWindow = angleCorrectWindow*0.5
-
+  
   useEffect(()=>{
-      //console.log("calibratingEffect")
+      console.log("calibratingEffect")
       if(!calibrationStartedOnce) return;
       if(calibrating){
         playCurrentBeep();
@@ -176,7 +172,7 @@ export const AngleDataAndCalibration = () => {
       _noteIndex = 14
     }
     else {
-      let angleDiffFromCorrect = angleDiff + halfAngleCorrectWindow * (angleDiff >= 0 ? -1 : 1)
+      let angleDiffFromCorrect = angleDiff + halfAngleCorrectWindow * (angleDiff >= 0 ? -1 : 1) 
       let signedNoteNum = Math.floor(angleDiffFromCorrect/angleDiv)
       _noteIndex = 7+signedNoteNum
     }
@@ -235,16 +231,13 @@ export const AngleDataAndCalibration = () => {
     beepCurrentPlayer2.remove()
   }
 
-  function UpdateAngleAndNote(){
+  function updateAngleAndNote(){
     let newZ = (noteTestZ+1)%360
     noteTestZ = newZ;
-    let z = (zeroedZTest%360+360)%360
-    console.log(z)
-    let newPendingNoteIndex = angleToNoteIndex(z)
-    //oisrgrwjg
-    console.log(newPendingNoteIndex)
+    let newPendingNoteIndex = angleToNoteIndex(noteTestZ)
     if (newPendingNoteIndex != pendingNoteIndex){
       pendingNoteIndex = newPendingNoteIndex
+      console.log(noteTestZ)
       console.log(newPendingNoteIndex)
     }
   }
